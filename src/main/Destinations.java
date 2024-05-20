@@ -2,101 +2,120 @@ package main;
 
 import java.util.Scanner;
 
-/*
- * This keeps track of all the destinations information
- */
-
 public class Destinations {
-
-    // to keep track if all airlines are booked
-    private boolean isBooked = false;
-
-    private BookingList[] bl = new BookingList[5];
+    private BookingList[] bookingLists;
+    //En array som representerar bokninglistorna för olika destinationer
 
     public Destinations() {
-        for (int i = 0; i < bl.length; i++) {
-            bl[i] = new BookingList();
+        this.bookingLists = new BookingList[5];
+        for (int i = 0; i < bookingLists.length; i++) {
+            bookingLists[i] = new BookingList();
         }
     }
 
-    /*
-     * booking list positions America [0] Canada [1] India [2] China [3] Japan [4]
-     */
-    public void destination(Scanner input, int destination) {
-        System.out.println("Great choice!! Many wonders to see there!");
-        System.out.println("Lets check for any spaces on the airplane...");
-        if (bl[destination].isBooked()) {
-            System.out.println("Unfortunityly there is no room on the this plane.");
-            System.out.println("But there are many other places to go!");
-            System.out.println("Please restart and choose a new place to go");
+    //Nedan är en metod för att kunna boka en sittplats till en viss destination.
+    //Den tar emot användarinmatning genom "scanner"
+    //Den tar emot "destination" för att ange destination och
+    //"isfirstclass" för att ange om det ekonomi eller first-class
+    public void destination(Scanner input, int destination, boolean isFirstClass) {
+        if (bookingLists[destination].isBooked(isFirstClass)) {
+            System.out.println("Unfortunately, there is no room on this plane.");
+            System.out.println("Please restart and choose a new place to go.");
         } else {
-            System.out.println("Looks like there is room. lets get you booked.");
-            System.out.println("I got a few questions to ask you");
             PassengerInfo pi = new PassengerInfo();
-            System.out.println("what is your first name?");
+            System.out.println("What is your first name?");
             pi.setFirstName(input.nextLine());
             System.out.println("What is your last name?");
             pi.setLastName(input.nextLine());
             System.out.println("What is your Date Of Birth? (ddmmyyyy)");
             pi.setDob(input.nextLine());
-            Locations[] locatal = Locations.values();
-            pi.setLocation(locatal[destination]);
-            bl[destination].addPassenger(pi);
-            System.out.println("Thank you! We got you added! Thank you for choosing AirLinesAirLines");
+            pi.setFirstClass(isFirstClass);
+            Locations[] locations = Locations.values();
+            pi.setLocation(locations[destination]);
+            bookingLists[destination].addPassenger(pi);
+            System.out.println("Thank you! We got you added! Thank you for choosing AirLineAirLines");
         }
     }
 
+    //En metod för att kontrollera en bokning.
+    //metoden ber om en del information för att kunna gå genom bokningslistan och see om personen bokad en resa
     public void checkBooking(Scanner input) {
-        boolean restart = true;
-        while (restart) {
+        System.out.println("Where are you going?");
+        System.out.println("1. America");
+        System.out.println("2. Canada");
+        System.out.println("3. India");
+        System.out.println("4. China");
+        System.out.println("5. Japan");
+        String sel = input.nextLine();
 
-            System.out.println("Alright im gonna ask you some questions");
-            System.out.println("Where are you going?");
-            System.out.println("1. America");
-            System.out.println("2. Canada");
-            System.out.println("3. India");
-            System.out.println("4. China");
-            System.out.println("5. Japan");
-            System.out.println("1. America");
-            String sel = input.nextLine();
-            if (!isNumber(sel)) {
-                System.out.println("Invalid input please try again. Choose number between 1-5");
-                continue;
+        if (!BookingSystem.isNumber(sel)) {
+            System.out.println("Invalid input, please try again. Choose a number between 1-5.");
+            return;
+        }
+
+        int seli = Integer.parseInt(sel) - 1;
+        System.out.println("What is your first name?");
+        String firstName = input.nextLine();
+        System.out.println("What is your last name?");
+        String lastName = input.nextLine();
+        System.out.println("What is your Date Of Birth? (ddmmyyyy)");
+        String dob = input.nextLine();
+
+        for (PassengerInfo pi : bookingLists[seli].getPassengers()) {
+            if (pi != null && pi.getFirstName().equals(firstName) && pi.getLastName().equals(lastName) && pi.getDob().equals(dob)) {
+                System.out.println("Booking found for " + pi.getFirstName() + " " + pi.getLastName() + " to " + pi.getLocation());
+                return;
             }
-            int seli = Integer.parseInt(sel);
-            Locations[] locatal = Locations.values();
-            PassengerInfo pi = new PassengerInfo();
-            pi.setLocation(locatal[seli]);
+        }
 
-            System.out.println("what is your first name?");
-            pi.setFirstName(input.nextLine());
-            System.out.println("What is your last name?");
-            pi.setLastName(input.nextLine());
-            System.out.println("What is your Date Of Birth? (ddmmyyyy)");
-            pi.setDob(input.nextLine());
+        System.out.println("No booking found for the provided details.");
+    }
 
-            for (int i = 0; i < 50; i++) {
-                PassengerInfo tmppi = bl[seli].getPassengerInfo(i);
-                if (tmppi.getFirstName().equals(pi.getFirstName()) && tmppi.getLastName().equals(pi.getLastName())
-                        && tmppi.getDob().equals(pi.getDob()) && tmppi.getLocation() == locatal[seli]) {
-                    System.out.println("We got your booking place. you are good to go");
-                    break;
-                }
-            }
+    public void cancelBooking(Scanner input) {
+        System.out.println("Where are you going?");
+        System.out.println("1. America");
+        System.out.println("2. Canada");
+        System.out.println("3. India");
+        System.out.println("4. China");
+        System.out.println("5. Japan");
+        String sel = input.nextLine();
+
+        if (!BookingSystem.isNumber(sel)) {
+            System.out.println("Invalid input, please try again. Choose a number between 1-5.");
+            return;
+        }
+
+        int seli = Integer.parseInt(sel) - 1;
+        System.out.println("What is your first name?");
+        String firstName = input.nextLine();
+        System.out.println("What is your last name?");
+        String lastName = input.nextLine();
+        System.out.println("What is your Date Of Birth? (ddmmyyyy)");
+        String dob = input.nextLine();
+
+        if (bookingLists[seli].removePassenger(firstName, lastName, dob)) {
+            System.out.println("Booking successfully canceled.");
+        } else {
+            System.out.println("No booking found for the provided details.");
         }
     }
 
-    public static boolean isNumber(String s) {
-        try {
-            Integer.parseInt(s);
-            return true; // If successful, it's a number
-        } catch (NumberFormatException e) {
-            return false; // If it throws NumberFormatException, it's not a number
+    public void showAvailableSeats() {
+        for (int i = 0; i < bookingLists.length; i++) {
+            Locations location = Locations.values()[i];
+            int economySeats = bookingLists[i].availableSeats(false);
+            int firstClassSeats = bookingLists[i].availableSeats(true);
+            System.out.println(location + " - Economy seats available: " + economySeats + ", First Class seats available: " + firstClassSeats);
         }
     }
 
+    //En metod för att kontrollera om alla platser är bokade för alla destinationer
     public boolean isBooked() {
-        return isBooked;
+        for (BookingList bl : bookingLists) {
+            if (!bl.isBooked()) {
+                return false;
+            }
+        }
+        return true;
     }
-
 }
